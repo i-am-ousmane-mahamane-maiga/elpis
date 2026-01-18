@@ -1,0 +1,43 @@
+TRACKER
+    - role: connect PEERs between themselves
+    - platforms:
+        - linux
+        - windows
+        - macos
+
+    - features:
+        - announce: to receive an announce from a PEER
+        - contact: to receive feedback/request/report from a PEER
+        - vote: to receive an up/down vote from PEER
+
+PEER
+    - role: listen/stream audio files
+    - platforms:
+        - linux
+        - android
+        - windows
+        - ios
+        - macos
+
+    - features
+        - announce: to send an announce of the LOCAL to the TRACKER
+        - search: to search a song/album/artist/playlist/genre from a PROVIDER
+        - stream: to stream from a PROVIDER
+        - download: to download a song/album/playlist from PEER/PROVIDER
+        - delete: to song/album/playlist delete from the LOCAL
+        - contact: to send a feedback/request/report in the TRACKER
+        - vote: to up/down vote
+
+LOCAL
+    - role: local node and its file system
+
+PROVIDER
+    - youtube - audio
+    - lrclib - lyrics
+    - aoty - metadata
+    - discogs - metadata
+    - musicbrainz - metadata
+    - songstats - metadata
+    - isrcfinder - metadata
+
+peer tries to get a song and when it's not available, it download it and announce it.
