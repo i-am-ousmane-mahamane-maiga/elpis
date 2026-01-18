@@ -1,0 +1,9 @@
+TRACKER
+    - role: connect PEERs between themselves
+    - platform:
+        - linux
+
+    - features:
+        - announce: to receive an announce from a PEER
+        - contact: to receive feedback/request/report from a PEER
+        - vote: to receive an up/down vote from PEER
