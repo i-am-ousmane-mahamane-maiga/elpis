@@ -1,13 +1,17 @@
-# apps/ratelimit/decorators.py
+import hashlib
+import secrets
+import string
+
 from functools import wraps
 from datetime import timedelta, timezone, datetime
 
-from django.db import transaction
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
 
 from core.models import Peer
+
+from ratelimit.models import RateLimit
 
 # from .models import Limit
 
@@ -54,14 +58,38 @@ def rate_limit(
             ip = get_client_ip(request)
             endpoint = key or request.resolver_match.view_name or request.path
 
-            # todo: stopped here
+            count = RateLimit.objects.filter(
+                Q(
+                    peer=peer,
+                    endpoint=endpoint,
+                    timestamp__gte=timestamp,
+                )
+                |
+                Q(
+                    ip=ip,
+                    endpoint=endpoint,
+                    timestamp__gte=timestamp,
+                )
+            ).distinct().count()
 
-            with transaction.atomic():
-                try:
-                    pass
+            if count >= limit:
+                return Response(
+                    {
+                        "limit": limit,
+                        "per": per,
+                        "key": endpoint,
+                    }
+                )
 
-                except Exception as e:
-                    pass
+            else:
+                RateLimit.objects.create(
+                    id=hashlib.sha256(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(64)).encode()).hexdigest(),
+                    peer=peer,
+                    ip=ip,
+                    endpoint=endpoint,
+                    timestamp=now,
+                )
+
 
             return view_func(request, *args, **kwargs)
 

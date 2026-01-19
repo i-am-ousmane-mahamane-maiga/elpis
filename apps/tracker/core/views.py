@@ -14,10 +14,9 @@ from ratelimit.decorators import rate_limit
 
 
 # todo: add security
-# todo: add rate_limit with ip address
 
 @api_view(["POST"])
-@rate_limit(limit=1, per="hour")
+@rate_limit(limit=10, per="hour")
 def announce(request):
     try:
         serializer = AnnounceSerializer(data=request.data)

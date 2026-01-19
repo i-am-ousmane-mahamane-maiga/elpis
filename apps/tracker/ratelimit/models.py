@@ -16,10 +16,9 @@ class RateLimit(BaseModel):
     ip = models.GenericIPAddressField()
     endpoint = models.CharField(max_length=255)
     timestamp = models.DateTimeField()
-    count = models.PositiveIntegerField(default=0)
 
     class Meta:
-        db_table = "pommezs"
+        db_table = "ratelimit"
         unique_together = ("peer", "ip", "endpoint", "timestamp")
         indexes = [
             models.Index(fields=["endpoint", "timestamp"]),
