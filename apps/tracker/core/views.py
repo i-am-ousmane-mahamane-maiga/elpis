@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from django.db import transaction
@@ -9,13 +10,14 @@ from rest_framework.response import Response
 from core.serializers import AnnounceSerializer
 from core.models import Peer
 
-ANNOUNCE_INTERVAL = 60 * 15
-PEERS_LIMIT = 10
+from ratelimit.decorators import rate_limit
 
-# todo: limit the number of events to receive at once
+
 # todo: add security
 # todo: add rate_limit with ip address
+
 @api_view(["POST"])
+@rate_limit(limit=1, per="hour")
 def announce(request):
     try:
         serializer = AnnounceSerializer(data=request.data)
@@ -93,7 +95,6 @@ def handle_announce_events(peer, events, timestamp):
 
             match event["action"]:
                 case "add":
-                    print(152)
                     attribute.add(_object)
                     result |= {
                         "ok": True,
@@ -103,7 +104,7 @@ def handle_announce_events(peer, events, timestamp):
                 case "get":
                     filters = {
                         f"{event["type"]}s__id": event["id"],
-                        "last_announce_timestamp__gte": timestamp - ANNOUNCE_INTERVAL,
+                        "last_announce_timestamp__gte": timestamp - int(os.getenv("ANNOUNCE_INTERVAL")),
                     }
 
                     result |= {
@@ -116,7 +117,7 @@ def handle_announce_events(peer, events, timestamp):
                             "last_announce_timestamp"
                         ).values(
                             "ip", "port"
-                        )[:PEERS_LIMIT])
+                        )[:int(os.getenv("PEERS_LIMIT"))])
                     }
 
                 case "remove":

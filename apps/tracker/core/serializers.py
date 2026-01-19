@@ -1,3 +1,4 @@
+import os
 import re
 
 from rest_framework import serializers
@@ -13,6 +14,8 @@ class AnnounceSerializer(serializers.Serializer):
     timestamp = serializers.IntegerField()
 
     def validate_events(self, value):
+        value = value[:int(os.getenv("EVENTS_LIMIT"))]
+
         events = {
             "keys": {
                 "truth": {"key", "action", "type", "id"},
