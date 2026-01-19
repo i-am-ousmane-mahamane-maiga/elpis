@@ -7,3 +7,49 @@ TRACKER
         - announce: to receive an announce from a PEER
         - contact: to receive feedback/request/report from a PEER
         - vote: to receive an up/down vote from PEER
+
+    - models:
+        - song:
+            - isrc
+            - name
+            - description
+            - artists
+            - genres
+
+        - lyric:
+            - song
+
+        - album:
+            - upc
+            - name
+            - description
+            - songs
+            - genres
+
+        - artist:
+            - insi
+            - name
+            - description
+
+        - playlist:
+            - name
+            - description
+            - songs
+
+        - genre:
+            - name
+            - description
+
+        - peer:
+            - ip
+            - port
+            - songs
+            - albums
+            - artists
+            - playlists
+            - last_announce_at
+
+    - announce:
+        - add
+        - get
+        - remove

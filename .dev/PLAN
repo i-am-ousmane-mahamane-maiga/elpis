@@ -39,5 +39,7 @@ PROVIDER
     - musicbrainz - metadata
     - songstats - metadata
     - isrcfinder - metadata
+    - upcfinder - metadata
+    - insifinder - metadata
 
 peer tries to get a song and when it's not available, it download it and announce it.
