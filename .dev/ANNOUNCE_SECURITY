@@ -7,7 +7,7 @@ Secure the /announce endpoint of a tracker-style system against abuse, spoofing,
 replay attacks, enumeration, poisoning, and flooding.
 
 
-1. Threat Model
+1. Threat Model (to do)
 ---------------
 
 The announce endpoint is exposed to the public internet and is vulnerable to:
@@ -22,7 +22,7 @@ The announce endpoint is exposed to the public internet and is vulnerable to:
 All incoming announces must be treated as hostile by default.
 
 
-2. Transport & Network Security
+2. Transport & Network Security (to do)
 -------------------------------
 
 - Enforce HTTPS only (TLS 1.2+)
@@ -34,7 +34,7 @@ Rationale:
 - Prevent sniffing, MITM, and accidental indexing
 
 
-3. Peer Identity Model
+3. Peer Identity Model (to do)
 ----------------------
 
 Each peer has a permanent identity:
@@ -51,7 +51,7 @@ Purpose:
 - Prevent impersonation
 
 
-4. Cryptographic Announce Signature
+4. Cryptographic Announce Signature (to do)
 -----------------------------------
 
 Each announce request MUST include a signature.
@@ -85,7 +85,7 @@ Purpose:
 - Prevent payload tampering
 
 
-5. Replay Protection
+5. Replay Protection (to do with signature)
 --------------------
 
 Replay attacks are prevented using:
@@ -108,7 +108,7 @@ Reject announce if:
 - Nonce has already been used
 
 
-6. Rate Limiting
+6. Rate Limiting (done)
 ----------------
 
 Apply strict rate limits to the announce endpoint.
@@ -129,7 +129,7 @@ Implementation:
 - Atomic updates to avoid race conditions
 
 
-7. Torrent-Level Access Control
+7. Torrent-Level Access Control (don't do this)
 -------------------------------
 
 Before accepting an announce:
@@ -147,7 +147,7 @@ Possible authorization methods:
 Reject announce if peer is not authorized for the torrent.
 
 
-8. Announce Payload Sanity Checks
+8. Announce Payload Sanity Checks (to do)
 ---------------------------------
 
 Reject announces with invalid or suspicious data:
@@ -164,7 +164,7 @@ Never trust:
 - Client-reported swarm state
 
 
-9. Response Hardening
+9. Response Hardening (to do)
 ---------------------
 
 Limit data returned to the peer:
@@ -186,7 +186,7 @@ Purpose:
 - Prevent swarm enumeration
 
 
-10. Abuse Detection & Banning
+10. Abuse Detection & Banning (don't do this)
 -----------------------------
 
 Track and penalize malicious behavior:
@@ -204,7 +204,7 @@ Actions:
 - Logging for later analysis
 
 
-11. Design Principles
+11. Design Principles (to do)
 ---------------------
 
 - Trust nothing from the client
