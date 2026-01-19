@@ -12,6 +12,7 @@ from core.models import Peer
 ANNOUNCE_INTERVAL = 60 * 15
 PEERS_LIMIT = 10
 
+# todo: limit the number of events to receive at once
 # todo: add security
 # todo: add rate_limit with ip address
 @api_view(["POST"])
