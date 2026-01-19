@@ -1,0 +1,165 @@
+TRACKER ENDPOINTS OVERVIEW
+===========================
+
+In a tracker-style system (BitTorrent-like or private tracker), the tracker is
+intentionally small and opinionated. It exposes very few endpoints because every
+public endpoint increases the attack surface.
+
+This document lists the canonical tracker endpoints, their purpose, and what is
+intentionally NOT exposed.
+
+
+CORE TRACKER ENDPOINTS
+---------------------
+
+1. /announce  (MANDATORY)
+
+Purpose:
+- Main interaction point between peers and the tracker
+
+Used for:
+- Joining a swarm
+- Keeping presence alive
+- Getting peer lists
+- Reporting status (started / stopped / completed)
+
+Characteristics:
+- High frequency
+- Strict validation
+- Heavily rate-limited
+- Minimal response
+
+HTTP Method:
+- Public trackers: GET
+- Secure / private trackers: POST
+
+
+2. /scrape  (OPTIONAL / OFTEN DISABLED)
+
+Purpose:
+- Return swarm statistics without announcing
+
+Example response:
+- Seeders
+- Leechers
+- Completed count
+
+Security risk:
+- Enables swarm enumeration
+- Useful for intelligence gathering by bots
+- Frequently abused
+
+Best practice:
+- Disable entirely OR
+- Restrict to authenticated users and cache heavily
+
+Many private trackers remove this endpoint completely.
+
+
+3. /peer/register  (PRIVATE)
+
+Purpose:
+- Initial peer identity creation
+
+Used for:
+- Generating peer_id
+- Issuing peer_secret
+- Binding peer to a user or account (optional)
+
+Characteristics:
+- Low frequency
+- Strong authentication
+- Never public
+
+Sometimes replaced by:
+- Admin-issued credentials
+- Invitation-based provisioning
+
+
+4. /torrent/register  (PRIVATE)
+
+Purpose:
+- Register torrents with the tracker
+
+Used for:
+- Creating torrent records
+- Assigning visibility (public / private)
+- Defining access-control rules
+
+This endpoint must never be public.
+
+
+5. /health or /status  (OPTIONAL)
+
+Purpose:
+- Operational monitoring
+- Health checks
+
+Typical response:
+{ "status": "ok" }
+
+Access:
+- Internal only
+- IP-restricted or authenticated
+
+
+OPTIONAL / ADVANCED ENDPOINTS
+----------------------------
+
+6. /banlist  (INTERNAL)
+
+Purpose:
+- Used by moderation systems
+- Abuse detection
+- Administrative dashboards
+
+Never exposed to peers.
+
+
+7. /metrics  (INTERNAL)
+
+Purpose:
+- Monitoring and observability
+- Announce rates
+- Abuse patterns
+- Performance metrics
+
+Typically used by Prometheus or similar tools.
+
+
+ENDPOINTS INTENTIONALLY NOT EXPOSED
+----------------------------------
+
+- User profiles
+- Peer lists outside /announce
+- Full swarm statistics
+- Search endpoints
+- Debug endpoints
+- Admin APIs on the public interface
+
+These features belong in separate systems, not the tracker.
+
+
+TYPICAL REAL-WORLD LAYOUT
+------------------------
+
+Public tracker:
+- /announce
+
+Private / secure tracker:
+- /announce
+- /peer/register
+- /torrent/register
+- /health
+
+
+DESIGN PRINCIPLE
+----------------
+
+If an endpoint does not directly serve swarm coordination, it should not exist
+on the tracker.
+
+Everything else belongs in:
+- A web application
+- An admin service
+- A separate API
