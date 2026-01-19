@@ -3,4 +3,4 @@
 *.pyc
 
 .env.*
-db.qlite3
+db.sqlite3

@@ -1,0 +1,234 @@
+ANNOUNCE ENDPOINT SECURITY DESIGN
+================================
+
+Purpose
+-------
+Secure the /announce endpoint of a tracker-style system against abuse, spoofing,
+replay attacks, enumeration, poisoning, and flooding.
+
+
+1. Threat Model
+---------------
+
+The announce endpoint is exposed to the public internet and is vulnerable to:
+
+- Fake peer announcements (peer poisoning)
+- Replay attacks (reusing old announces)
+- Identity spoofing
+- Swarm enumeration
+- Flooding / DDoS amplification
+- Invalid or malicious peer injection
+
+All incoming announces must be treated as hostile by default.
+
+
+2. Transport & Network Security
+-------------------------------
+
+- Enforce HTTPS only (TLS 1.2+)
+- Disable HTTP
+- Enforce POST requests only
+- Reject GET-based announce URLs
+
+Rationale:
+- Prevent sniffing, MITM, and accidental indexing
+
+
+3. Peer Identity Model
+----------------------
+
+Each peer has a permanent identity:
+
+- peer_id        : public identifier (e.g. SHA256 of public key)
+- peer_secret    : private secret (never transmitted directly)
+
+Storage:
+- Store only a hash of peer_secret in the database
+- Never store raw secrets
+
+Purpose:
+- Authenticate peer identity
+- Prevent impersonation
+
+
+4. Cryptographic Announce Signature
+-----------------------------------
+
+Each announce request MUST include a signature.
+
+Announce payload example:
+
+{
+  peer_id,
+  torrent_id,
+  timestamp,
+  nonce,
+  port,
+  signature
+}
+
+Signature generation:
+
+- Algorithm: HMAC-SHA256
+- Key: peer_secret
+- Message:
+  peer_id + torrent_id + timestamp + nonce + port
+
+Server-side verification:
+
+- Verify signature validity
+- Reject invalid or missing signatures
+- Reject mismatched peer_id / secret
+
+Purpose:
+- Prevent spoofing
+- Prevent payload tampering
+
+
+5. Replay Protection
+--------------------
+
+Replay attacks are prevented using:
+
+- Timestamp validation
+- Nonce tracking
+
+Rules:
+
+- Timestamp must be within an allowed window (e.g. ±60 seconds)
+- Nonce must be unique per peer
+
+Nonce storage:
+
+- Store (peer_id, nonce, created_at)
+- Periodically delete old nonces (TTL cleanup)
+
+Reject announce if:
+- Timestamp is expired
+- Nonce has already been used
+
+
+6. Rate Limiting
+----------------
+
+Apply strict rate limits to the announce endpoint.
+
+Rate limiting dimensions:
+
+- Authenticated user (if applicable)
+- Peer identity
+- IP address
+- Endpoint key (tracker.announce)
+
+Example limits:
+- 10 announces per minute per peer
+- Stricter limits for anonymous peers
+
+Implementation:
+- Database-backed rate limit table
+- Atomic updates to avoid race conditions
+
+
+7. Torrent-Level Access Control
+-------------------------------
+
+Before accepting an announce:
+
+- Verify the torrent exists
+- Check torrent visibility:
+  - Public torrent → allow
+  - Private torrent → peer must be authorized
+
+Possible authorization methods:
+- Allowed peer list
+- Invitation token
+- Tracker-issued access key
+
+Reject announce if peer is not authorized for the torrent.
+
+
+8. Announce Payload Sanity Checks
+---------------------------------
+
+Reject announces with invalid or suspicious data:
+
+- Private or reserved IP ranges
+- Invalid port numbers (port < 1024 or > 65535)
+- Excessive announce frequency
+- Invalid torrent identifiers
+- Invalid swarm metadata
+
+Never trust:
+- IP address sent by the client
+- Peer count claims
+- Client-reported swarm state
+
+
+9. Response Hardening
+---------------------
+
+Limit data returned to the peer:
+
+- Maximum peers returned per announce (e.g. 50)
+- Randomize / shuffle peer list
+- Return only:
+  - IP
+  - Port
+
+Never return:
+- Internal IDs
+- Secrets
+- Peer metadata
+- Tracker internals
+
+Purpose:
+- Reduce data leakage
+- Prevent swarm enumeration
+
+
+10. Abuse Detection & Banning
+-----------------------------
+
+Track and penalize malicious behavior:
+
+Triggers:
+- Invalid signatures
+- Excessive rate-limit violations
+- Invalid timestamps
+- Repeated replay attempts
+
+Actions:
+- Temporary IP bans
+- Peer bans
+- Silent dropping of announces
+- Logging for later analysis
+
+
+11. Design Principles
+---------------------
+
+- Trust nothing from the client
+- Validate everything
+- Prefer rejection over tolerance
+- Keep announce responses minimal
+- Make abuse expensive
+
+Core rule:
+"Every announce is hostile until proven valid."
+
+
+12. Security Layer Summary
+--------------------------
+
+- HTTPS enforced
+- Peer identity authentication
+- Cryptographic signatures
+- Replay protection via nonce + timestamp
+- Database-backed rate limiting
+- Input validation
+- Response hardening
+- Abuse detection and banning
+
+
+End of Document
+---------------
