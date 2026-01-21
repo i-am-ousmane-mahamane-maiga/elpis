@@ -5,3 +5,11 @@
 
 .env.*
 db.sqlite3
+
+**/storage/songs/*
+!**/storage/songs/
+!**/storage/songs/.gitkeep
+
+**/storage/lyrics/*
+!**/storage/lyrics/
+!**/storage/lyrics/.gitkeep
