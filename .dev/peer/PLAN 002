@@ -1,0 +1,16 @@
+PEER
+    - role: listen/stream audio files
+    - platforms:
+        - linux
+
+    - features
+        - announce: to send an announce of the LOCAL to the TRACKER
+        - search: to search a song/album/artist/playlist/genre from a PROVIDER
+        - stream: to stream from a PROVIDER
+        - download: to download a song/album/playlist from PEER/PROVIDER
+        - delete: to song/album/playlist delete from the LOCAL
+        - contact: to send a feedback/request/report in the TRACKER
+        - vote: to up/down vote
+
+LOCAL
+    - role: local node and its file system
